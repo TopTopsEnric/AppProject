@@ -7,11 +7,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import cat.itb.m78.exercices.theme.AppTheme
+import cat.itb.m78.exercices.theme.Stateless.HelloWorld
+import cat.itb.m78.exercices.theme.Stateless.Welcome
+import cat.itb.m78.exercices.theme.Stateless.contact
+import cat.itb.m78.exercices.theme.Stateless.resources
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
 internal fun App() = AppTheme {
-    Box(Modifier.fillMaxSize()){
-        Text("Your app goes here!", Modifier.align(Alignment.Center))
-    }
+    contact()
 }
