@@ -40,15 +40,5 @@ val messages = List(100){
 }
 @Composable
 fun message(){
-    Column {
-        Row(){
-            Icon(Icons.Rounded.Menu, contentDescription = "Localized description")
-        }
-        Column(){
 
-        }
-        Row(){
-
-        }
-    }
 }
