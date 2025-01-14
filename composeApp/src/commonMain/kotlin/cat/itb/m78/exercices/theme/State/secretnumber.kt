@@ -12,35 +12,41 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import kotlin.random.Random
 
+enum class ValueResult{
+    GREATER, LOWER, SAME, NOT_VALID;
 
-fun calculador(input: String,numeroRandom:Int): Pair<String, Int> {
+    fun toUiString(): String {
+        return when(this){
+            GREATER ->  "El número es mayor"
+            LOWER -> "El número es menor"
+            SAME -> "Has acertat."
+            NOT_VALID -> "No se encontró ningún número en el texto."
+        }
+    }
+}
+
+
+
+fun checkValue(input: String,numeroRandom:Int): ValueResult {
     val number = Regex("\\d+").find(input)?.value?.toInt()
-
-    // Contador para las veces que no se cumple la igualdad
-    var contador = 0
-
-    // Evaluamos el número extraído
-    val resultado = if (number != null) {
+    return if (number != null) {
         if (number > numeroRandom) {
-            "El número es mayor"
+            ValueResult.GREATER
         } else if (numeroRandom < number) {
-            "El número es menor"
+            ValueResult.LOWER
         } else {
-            "Has acertat."
-        }.also {
-            // Incrementamos el contador si no es igual
-            if (number != numeroRandom) contador++
+            ValueResult.SAME
         }
     } else {
-        "No se encontró ningún número en el texto."
+        ValueResult.NOT_VALID
     }
-
-    // Devolvemos la frase y el contador
-    return Pair(resultado, contador)
 }
+
+
 
 @Composable
 fun misterynumber() {
+    var contador=0;
     val numeroRandom = Random.nextInt(0, 101)
     Column(modifier = Modifier.padding(20.dp)) {
         Text("Esdevina el número Secret")
@@ -55,9 +61,13 @@ fun misterynumber() {
         var texto = remember { mutableStateOf("0") }
         var frase = remember { mutableStateOf("") }
         Button(onClick = {
-            val resultados = calculador(textState.value,numeroRandom)
-            texto.value= resultados.first
-            frase.value=resultados.second.toString()
+            val result = checkValue(textState.value,numeroRandom)
+            if(result!=ValueResult.SAME){
+                 contador++;
+            }
+            //val resultados = calculador(textState.value,numeroRandom)
+            texto.value= contador.toString()
+            frase.value= result.toUiString()
 
         }) {
             Text("Validar")
