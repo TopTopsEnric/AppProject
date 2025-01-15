@@ -65,7 +65,6 @@ fun misterynumber() {
             if(result!=ValueResult.SAME){
                  contador++;
             }
-            //val resultados = calculador(textState.value,numeroRandom)
             texto.value= contador.toString()
             frase.value= result.toUiString()
 
