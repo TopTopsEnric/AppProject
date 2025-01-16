@@ -15,9 +15,10 @@ import cat.itb.m78.exercices.theme.Stateless.HelloWorld
 import cat.itb.m78.exercices.theme.Stateless.Welcome
 import cat.itb.m78.exercices.theme.Stateless.contact
 import cat.itb.m78.exercices.theme.Stateless.resources
+import cat.itb.m78.exercices.theme.ViewModel.anotarequipo
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
 internal fun App() = AppTheme {
-    rollDice()
+    anotarequipo()
 }
