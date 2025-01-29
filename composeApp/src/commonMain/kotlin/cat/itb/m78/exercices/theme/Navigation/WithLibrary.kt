@@ -1,68 +1,88 @@
 package cat.itb.m78.exercices.theme.Navigation
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
+import androidx.navigation.navArgument
+
 import kotlinx.serialization.Serializable
 
+// Objeto Destination con data objects y data class
 object Destination {
-    @kotlinx.serialization.Serializable
-    data object Screenlib0
-    @kotlinx.serialization.Serializable
-    data object Screenlib1
-    @kotlinx.serialization.Serializable
-    data object Screenlib2
     @Serializable
-    data class Screenlib3(val message: String)
+    data object Screen1
+
+    @Serializable
+    data object Screen2
+
+    @Serializable
+    data class Screen3(val message: String)
+
+    @Serializable
+    data object Screen4
 }
+
 @Composable
-fun Screenlib0(navigateToScreen1: () -> Unit) {
+fun Screen1(
+    navigateToScreen2: () -> Unit,
+    navigateToScreen3: (String) -> Unit,
+    navigateToScreen4: () -> Unit
+) {
     Column {
-        Text(text = "Screen1")
-        Button(onClick = navigateToScreen1) {
-            Text("Go to Screen2")
+        Button(onClick = navigateToScreen2) {
+            Text("Screen1")
+        }
+        Button(onClick = navigateToScreen4) {
+            Text("Screen2")
+        }
+        Button(onClick = { navigateToScreen3("¡Hola!") }) {
+            Text("Screen3")
         }
     }
 }
 
 @Composable
-fun Screenlib1(navigateToScreen1: () -> Unit) {
+fun Screen2(navigateBack: () -> Unit) {
     Column {
-        Text(text = "Screen1")
-        Button(onClick = navigateToScreen1) {
-            Text("Go to Screen2")
+        Text(text = "Screen 1")
+        Button(onClick = navigateBack) {
+            Text("Main Menu")
         }
     }
 }
+
 @Composable
-fun Screenlib2(navigateToScreen2: () -> Unit) {
+fun Screen3(message: String, navigateBack: () -> Unit) {
     Column {
-        Text(text = "Screen1")
-        Button(onClick = navigateToScreen2) {
-            Text("Go to Screen2")
+        Text(text = "Screen 3")
+        Text(text = "$message")
+        Button(onClick = navigateBack) {
+            Text("Main Menu")
         }
     }
 }
+
 @Composable
-fun Screenlib3(navigateToScreen2: () -> Unit) {
-    Column {
-        Text(text = "Screen1")
-        Button(onClick = navigateToScreen2) {
-            Text("Go to Screen2")
-        }
-    }
-}
-@Composable
-fun Screenlib4(navigateToScreen2: () -> Unit) {
-    Column {
-        Text(text = "Screen1")
-        Button(onClick = navigateToScreen2) {
-            Text("Go to Screen2")
+fun Screen4(navigateBack: () -> Unit) {
+    Column(modifier = Modifier
+        .background(color = Color(0xFF0000)),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,) {
+        Text(text = "Screen 2")
+        Button(onClick = navigateBack) {
+            Text("Main Menu")
         }
     }
 }
@@ -70,18 +90,27 @@ fun Screenlib4(navigateToScreen2: () -> Unit) {
 @Composable
 fun LibNavScreenSample() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = Destination.Screenlib0) {
-        composable<Destination.Screenlib1> {
+
+    NavHost(navController = navController, startDestination = Destination.Screen1.toString()) {
+        composable(Destination.Screen1.toString()) {
             Screen1(
-                navigateToScreen2 = { navController.navigate(Destination.Screenlib0) },
+                navigateToScreen2 = { navController.navigate(Destination.Screen2.toString()) },
+                navigateToScreen3 = { message -> navController.navigate(Destination.Screen3(message).toString()) },
+                navigateToScreen4 = { navController.navigate(Destination.Screen4.toString()) }
             )
         }
-        composable<Destination.Screenlib2> {
-            Screen2 { navController.navigate(Destination.Screenlib0) }
+        composable(Destination.Screen2.toString()) {
+            Screen2 { navController.popBackStack() }
         }
-        composable<Destination.Screenlib3> { backStack ->
-            val message = backStack.toRoute<Destination.Screenlib3>().message
-            Screen3(message)
+        composable(
+            route = Destination.Screen3("{message}").toString(),
+            arguments = listOf(navArgument("message") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val message = backStackEntry.arguments?.getString("message") ?: "Mensaje vacío"
+            Screen3(message) { navController.popBackStack() }
+        }
+        composable(Destination.Screen4.toString()) {
+            Screen4 { navController.popBackStack() }
         }
     }
 }
