@@ -7,6 +7,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import cat.itb.m78.exercices.theme.AppTheme
+import cat.itb.m78.exercices.theme.Jueguito.jueguito
 import cat.itb.m78.exercices.theme.Navigation.LibNavScreenSample
 import cat.itb.m78.exercices.theme.State.Goodday
 import cat.itb.m78.exercices.theme.State.misterynumber
@@ -22,5 +23,5 @@ import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
 internal fun App() = AppTheme {
-    LibNavScreenSample()
+    jueguito()
 }
