@@ -28,6 +28,7 @@ import kotlinx.serialization.Serializable
 import m78exercices.composeapp.generated.resources.Res
 import m78exercices.composeapp.generated.resources.dice_1
 import m78exercices.composeapp.generated.resources.karenCara
+import m78exercices.composeapp.generated.resources.trivial
 import org.jetbrains.compose.resources.painterResource
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -184,7 +185,7 @@ fun Screen1(
     ) {
         // Imagen de fondo
         Image(
-            painter = painterResource(Res.drawable.dice_1),
+            painter = painterResource(Res.drawable.trivial),
             contentDescription = "Imagen de fondo",
             contentScale = ContentScale.Crop, // Ajusta la escala de la imagen
             modifier = Modifier.size(200.dp)
