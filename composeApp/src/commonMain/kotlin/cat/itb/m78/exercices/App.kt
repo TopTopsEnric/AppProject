@@ -19,7 +19,7 @@ import cat.itb.m78.exercices.theme.Stateless.contact
 import cat.itb.m78.exercices.theme.Stateless.resources
 import cat.itb.m78.exercices.theme.Trivial.blaLibNavScreenSample
 import cat.itb.m78.exercices.theme.ViewModel.AnotarEquipo
-import cat.itb.m78.exercices.theme.ViewModel.listaCompra
+
 import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
