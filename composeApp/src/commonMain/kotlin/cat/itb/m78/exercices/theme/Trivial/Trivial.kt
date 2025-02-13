@@ -59,10 +59,7 @@ data class Question(
 // GAME VIEWMODEL: CONTIENE TANTO LA LÓGICA DEL JUEGO COMO LOS AJUSTES
 
 class GameViewModel : ViewModel() {
-    // ----- AJUSTES (por defecto) -----
-    var totalRounds by mutableStateOf(5)
-    var gameTimeSeconds by mutableStateOf(10)
-    var difficulty by mutableStateOf("Easy")
+
 
     // ----- ESTADO DEL JUEGO -----
     var currentRound by mutableStateOf(1)
@@ -70,6 +67,7 @@ class GameViewModel : ViewModel() {
     var currentQuestion: Question? by mutableStateOf(null)
     var timerValue by mutableStateOf(0)
     var gameFinished by mutableStateOf(false)
+
 
     // Lista de preguntas “faciles”
     private val questions = listOf(
@@ -96,12 +94,8 @@ class GameViewModel : ViewModel() {
     )
     private var questionIndex = 0
 
-    // Inicia o reinicia el juego
+
     fun startGame() {
-        currentRound = 1
-        score = 0
-        gameFinished = false
-        questionIndex = 0
         loadQuestion()
     }
 
@@ -124,7 +118,7 @@ class GameViewModel : ViewModel() {
 
     // Avanza a la siguiente ronda o finaliza el juego
     private fun moveToNextRound() {
-        if (currentRound < totalRounds) {
+        if (currentRound < TrivialSettingsManager.get().questionsPerGame) {
             currentRound++
             loadQuestion()
         } else {
@@ -139,7 +133,7 @@ class GameViewModel : ViewModel() {
 
     // Inicia el temporizador para cada pregunta
     private fun startTimer() {
-        timerValue = gameTimeSeconds
+        timerValue = TrivialSettingsManager.get().tiempoRonda
         viewModelScope.launch {
             while (timerValue > 0) {
                 delay(1000L)
@@ -148,33 +142,13 @@ class GameViewModel : ViewModel() {
             onTimerFinished()
         }
     }
-
-    // ----- FUNCIONES PARA MODIFICAR LOS AJUSTES -----
-    fun updateTotalRounds(rounds: Int) {
-        totalRounds = rounds
-    }
-
-    fun updateGameTime(seconds: Int) {
-        gameTimeSeconds = seconds
-    }
-
-    fun updateDifficulty(diff: String) {
-        difficulty = diff
-    }
-
-    // Para reiniciar el juego desde la pantalla de resultados
-    fun resetGame() {
-        startGame()
-    }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
 // PANTALLA 1: MENÚ PRINCIPAL
 @Composable
 fun Screen1(
     navigateToScreen2: () -> Unit,
     navigateToScreen4: () -> Unit,
-    gameViewModel: GameViewModel
 ) {
     Column(
         modifier = Modifier
@@ -193,8 +167,6 @@ fun Screen1(
         Spacer(modifier = Modifier.height(16.dp))
         Row {
             Button(onClick = {
-                // Inicia el juego
-                gameViewModel.startGame()
                 navigateToScreen2()
             }) {
                 Text("Jugar")
@@ -209,23 +181,31 @@ fun Screen1(
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PANTALLA 2: PANTALLA DEL JUEGO (PREGUNTA, RESPUESTAS Y TEMPORIZADOR)
+
+@Composable
+fun FScreen2(navigateToScore: () -> Unit) {
+    val viewModel = viewModel { GameViewModel() }
+    Screen2(navigateToScore,viewModel.currentRound,TrivialSettingsManager.get().questionsPerGame,
+        viewModel.currentQuestion,viewModel.timerValue,viewModel.gameFinished,answerQuestion = viewModel::answerQuestion,loadQuestion=viewModel::startGame)
+}
 @Composable
 fun Screen2(
     navigateToScore: () -> Unit,
-    gameViewModel: GameViewModel
+    currentRound: Int,
+    totalRounds: Int,
+    currentQuestion: Question?,
+    timerValue:Int,
+    gameFinished:Boolean,
+    answerQuestion: (Int) -> Unit,
+    loadQuestion:()->Unit
 ) {
-    // Se observan los estados necesarios
-    val currentRound = gameViewModel.currentRound
-    val totalRounds = gameViewModel.totalRounds
-    val currentQuestion = gameViewModel.currentQuestion
-    val timerValue = gameViewModel.timerValue
-    val gameFinished = gameViewModel.gameFinished
-
-    // Si se terminó el juego, se navega automáticamente a la pantalla de resultados
     if (gameFinished) {
         LaunchedEffect(Unit) {
             navigateToScore()
         }
+    }
+    LaunchedEffect(Unit) {
+        loadQuestion()
     }
 
     Column(
@@ -244,7 +224,7 @@ fun Screen2(
         // Se muestran los 4 botones de respuesta (o la cantidad que tenga la pregunta)
         currentQuestion?.answers?.forEachIndexed { index, answer ->
             Button(
-                onClick = { gameViewModel.answerQuestion(index) },
+                onClick = {answerQuestion(index)},
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -255,12 +235,16 @@ fun Screen2(
     }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
+@Composable
+fun FScreen3(navigateToMainMenu: () -> Unit) {
+    val viewModel = viewModel { GameViewModel() }
+    Screen3(navigateToMainMenu,viewModel.score)
+}
 // PANTALLA 3: RESULTADO
 @Composable
 fun Screen3(
     navigateToMainMenu: () -> Unit,
-    gameViewModel: GameViewModel
+    score: Int
 ) {
     Column(
         modifier = Modifier
@@ -269,11 +253,11 @@ fun Screen3(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Tu Puntuación: ${gameViewModel.score}")
+        Text(text = "Tu Puntuación: ${score}")
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = {
             // Reinicia el juego y vuelve al menú principal
-            gameViewModel.resetGame()
+
             navigateToMainMenu()
         }) {
             Text("Volver al Menú")
@@ -288,7 +272,7 @@ fun Screen4(
     navigateBack: () -> Unit,
     gameViewModel: GameViewModel
 ) {
-
+ /*
     var roundsText by remember { mutableStateOf(gameViewModel.totalRounds.toString()) }
     var timeText by remember { mutableStateOf(gameViewModel.gameTimeSeconds.toString()) }
     var difficultyText by remember { mutableStateOf(gameViewModel.difficulty) }
@@ -330,7 +314,7 @@ fun Screen4(
         }) {
             Text("Guardar y Volver")
         }
-    }
+    }*/
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -346,22 +330,22 @@ fun blaLibNavScreenSample() {
             Screen1(
                 navigateToScreen2 = { navController.navigate(Destination.Screen2.toString()) },
                 navigateToScreen4 = { navController.navigate(Destination.Screen4.toString()) },
-                gameViewModel = gameViewModel
+
             )
         }
         composable(Destination.Screen2.toString()) {
-            Screen2(
+            FScreen2(
                 navigateToScore = { navController.navigate(Destination.Screen3.toString()) },
-                gameViewModel = gameViewModel
+
             )
         }
         composable(Destination.Screen3.toString()) {
-            Screen3(
+            FScreen3(
                 navigateToMainMenu = {
                     // Vuelve al menú principal
                     navController.popBackStack(Destination.Screen1.toString(), false)
                 },
-                gameViewModel = gameViewModel
+
             )
         }
         composable(Destination.Screen4.toString()) {
