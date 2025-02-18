@@ -1,0 +1,11 @@
+Funcionalitats:
+
+    L'usuari pot introduïr un valor al camp de text - 0.5
+    L'aplicació pot sumar valors - 1
+    L'usuari pot seleccionar una operació - 0.5
+    L'usuari pot fer les tres operacions - 3
+    Pantalla resultat - 1.5
+    Look and feel - 1( es veu horrible aixi que no crec que compti)
+
+    Netedat del codi - 1(ajustas segon criteri)
+    Les funcions composable que composen la vista (botons, edit texts, etc) no utilitzen directament el viewModel - 1
