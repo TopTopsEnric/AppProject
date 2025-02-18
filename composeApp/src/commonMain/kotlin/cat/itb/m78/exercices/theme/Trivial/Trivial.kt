@@ -7,7 +7,12 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,102 +52,7 @@ object Destination {
     data object Screen4
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// DATA CLASS PARA LAS PREGUNTAS
-data class Question(
-    val questionText: String,
-    val answers: List<String>,
-    val correctAnswerIndex: Int
-)
 
-// ─────────────────────────────────────────────────────────────────────────────
-// GAME VIEWMODEL: CONTIENE TANTO LA LÓGICA DEL JUEGO COMO LOS AJUSTES
-
-class GameViewModel : ViewModel() {
-
-
-    // ----- ESTADO DEL JUEGO -----
-    var currentRound by mutableStateOf(1)
-    var score by mutableStateOf(0)
-    var currentQuestion: Question? by mutableStateOf(null)
-    var timerValue by mutableStateOf(0)
-    var gameFinished by mutableStateOf(false)
-
-
-    // Lista de preguntas “faciles”
-    private val questions = listOf(
-        Question(
-            questionText = "¿Cuál es la capital de Francia?",
-            answers = listOf("París", "Roma", "Madrid", "Berlín"),
-            correctAnswerIndex = 0
-        ),
-        Question(
-            questionText = "¿Cuánto es 2 + 2?",
-            answers = listOf("3", "4", "5", "22"),
-            correctAnswerIndex = 1
-        ),
-        Question(
-            questionText = "¿De qué color es el cielo?",
-            answers = listOf("Azul", "Verde", "Rojo", "Amarillo"),
-            correctAnswerIndex = 0
-        ),
-        Question(
-            questionText = "¿Qué animal ladra?",
-            answers = listOf("Gato", "Perro", "Vaca", "Oveja"),
-            correctAnswerIndex = 1
-        )
-    )
-    private var questionIndex = 0
-
-
-    fun startGame() {
-        loadQuestion()
-    }
-
-    // Carga la siguiente pregunta (se recorre la lista cíclicamente)
-    private fun loadQuestion() {
-        currentQuestion = questions[questionIndex % questions.size]
-        questionIndex++
-        startTimer()
-    }
-
-    // Se invoca cuando se pulsa una respuesta
-    fun answerQuestion(answerIndex: Int) {
-        currentQuestion?.let { question ->
-            if (answerIndex == question.correctAnswerIndex) {
-                score++
-            }
-        }
-        moveToNextRound()
-    }
-
-    // Avanza a la siguiente ronda o finaliza el juego
-    private fun moveToNextRound() {
-        if (currentRound < TrivialSettingsManager.get().questionsPerGame) {
-            currentRound++
-            loadQuestion()
-        } else {
-            gameFinished = true
-        }
-    }
-
-    // Si se acaba el temporizador sin contestar, se pasa a la siguiente ronda
-    fun onTimerFinished() {
-        moveToNextRound()
-    }
-
-    // Inicia el temporizador para cada pregunta
-    private fun startTimer() {
-        timerValue = TrivialSettingsManager.get().tiempoRonda
-        viewModelScope.launch {
-            while (timerValue > 0) {
-                delay(1000L)
-                timerValue--
-            }
-            onTimerFinished()
-        }
-    }
-}
 
 // PANTALLA 1: MENÚ PRINCIPAL
 @Composable
@@ -185,26 +95,35 @@ fun Screen1(
 @Composable
 fun FScreen2(navigateToScore: () -> Unit) {
     val viewModel = viewModel { GameViewModel() }
-    Screen2(navigateToScore,viewModel.currentRound,TrivialSettingsManager.get().questionsPerGame,
-        viewModel.currentQuestion,viewModel.timerValue,viewModel.gameFinished,answerQuestion = viewModel::answerQuestion,loadQuestion=viewModel::startGame)
+    Screen2(
+        navigateToScore,
+        viewModel.currentRound,
+        TrivialSettingsManager.get().questionsPerGame,
+        viewModel.currentQuestion,
+        viewModel.timerValue,
+        viewModel.gameFinished,
+        answerQuestion = viewModel::answerQuestion,
+        loadQuestion = viewModel::loadQuestion
+    )
 }
+
 @Composable
 fun Screen2(
     navigateToScore: () -> Unit,
     currentRound: Int,
     totalRounds: Int,
     currentQuestion: Question?,
-    timerValue:Int,
-    gameFinished:Boolean,
+    timerValue: Int,
+    gameFinished: Boolean,
     answerQuestion: (Int) -> Unit,
-    loadQuestion:()->Unit
+    loadQuestion: () -> Unit
 ) {
     if (gameFinished) {
         LaunchedEffect(Unit) {
             navigateToScore()
         }
     }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(currentRound) {
         loadQuestion()
     }
 
@@ -221,10 +140,10 @@ fun Screen2(
         Spacer(modifier = Modifier.height(8.dp))
         Text(text = "Tiempo: $timerValue seg")
         Spacer(modifier = Modifier.height(16.dp))
-        // Se muestran los 4 botones de respuesta (o la cantidad que tenga la pregunta)
+        // opciones
         currentQuestion?.answers?.forEachIndexed { index, answer ->
             Button(
-                onClick = {answerQuestion(index)},
+                onClick = { answerQuestion(index) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 4.dp)
@@ -238,9 +157,15 @@ fun Screen2(
 @Composable
 fun FScreen3(navigateToMainMenu: () -> Unit) {
     val viewModel = viewModel { GameViewModel() }
-    Screen3(navigateToMainMenu,viewModel.score)
+    Screen3(
+        navigateToMainMenu = {
+            viewModel.resetForNewGame()
+            navigateToMainMenu()
+        },
+        score = viewModel.finalScore
+    )
 }
-// PANTALLA 3: RESULTADO
+
 @Composable
 fun Screen3(
     navigateToMainMenu: () -> Unit,
@@ -253,13 +178,12 @@ fun Screen3(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Tu Puntuación: ${score}")
+        Text(
+            text = "Tu Puntuación Final: $score",
+            style = MaterialTheme.typography.headlineMedium
+        )
         Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            // Reinicia el juego y vuelve al menú principal
-
-            navigateToMainMenu()
-        }) {
+        Button(onClick = navigateToMainMenu) {
             Text("Volver al Menú")
         }
     }
@@ -267,16 +191,35 @@ fun Screen3(
 
 // ─────────────────────────────────────────────────────────────────────────────
 // PANTALLA 4: AJUSTES
+
+@Composable
+fun FScreen4(navigateBack: () -> Unit) {
+    val viewModel = viewModel { SettingsViewModel() } // Usa viewModel() para obtener la instancia
+
+    Screen4(
+        navigateBack = {
+            viewModel.saveSettings() // Guarda los ajustes antes de navegar
+            navigateBack()
+        },
+        currentDifficulty = viewModel.difficulty,
+        currentRounds = viewModel.totalRounds,
+        currentTime = viewModel.gameTimeSeconds,
+        onDifficultyChanged = { viewModel.updateDifficulty(it) },
+        onRoundsChanged = { viewModel.updateTotalRounds(it) },
+        onTimeChanged = { viewModel.updateGameTime(it) }
+    )
+}
+
 @Composable
 fun Screen4(
     navigateBack: () -> Unit,
-    gameViewModel: GameViewModel
+    currentDifficulty: String,
+    currentRounds: Int,
+    currentTime: Int,
+    onDifficultyChanged: (String) -> Unit,
+    onRoundsChanged: (Int) -> Unit,
+    onTimeChanged: (Int) -> Unit
 ) {
- /*
-    var roundsText by remember { mutableStateOf(gameViewModel.totalRounds.toString()) }
-    var timeText by remember { mutableStateOf(gameViewModel.gameTimeSeconds.toString()) }
-    var difficultyText by remember { mutableStateOf(gameViewModel.difficulty) }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -285,37 +228,86 @@ fun Screen4(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(text = "Ajustes", color = Color.White)
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = roundsText,
-            onValueChange = { roundsText = it },
-            label = { Text("Número de rondas") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = timeText,
-            onValueChange = { timeText = it },
-            label = { Text("Tiempo por pregunta (segundos)") }
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        OutlinedTextField(
-            value = difficultyText,
-            onValueChange = { difficultyText = it },
-            label = { Text("Dificultad") }
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Button(onClick = {
-            // Actualiza los ajustes en el viewmodel y vuelve atrás
-            gameViewModel.updateTotalRounds(roundsText.toIntOrNull() ?: gameViewModel.totalRounds)
-            gameViewModel.updateGameTime(timeText.toIntOrNull() ?: gameViewModel.gameTimeSeconds)
-            gameViewModel.updateDifficulty(difficultyText)
-            navigateBack()
-        }) {
+        Text("Ajustes", color = Color.White)
+        Spacer(modifier = Modifier.height(24.dp))
+
+        var expanded by remember { mutableStateOf(false) }
+        Box(modifier = Modifier.wrapContentSize(Alignment.TopStart)) {
+            Button(onClick = { expanded = true }) {
+                Text(
+                    text = currentDifficulty.replaceFirstChar { it.uppercase() },
+                    color = Color.White
+                )
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                listOf("facil", "moderado", "dificil").forEach { difficulty ->
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = difficulty.replaceFirstChar { it.uppercase() },
+                                color = Color.Green
+                            )
+                        },
+                        onClick = {
+                            onDifficultyChanged(difficulty)
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Selector de Rondas
+        Text("Rondas", color = Color.White)
+        Row(modifier = Modifier.padding(8.dp)) {
+            listOf(5, 10, 15).forEach { rounds ->
+                Button(
+                    onClick = { onRoundsChanged(rounds) },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (rounds == currentRounds) Color.Green else Color.Gray // Usa containerColor
+                    ),
+                    modifier = Modifier.padding(4.dp)
+                ) {
+                    Text(rounds.toString())
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Selector de Tiempo
+        // Selector de Tiempo - Versión corregida
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Slider(
+                value = currentTime.toFloat(),
+                onValueChange = { onTimeChanged(it.toInt()) },
+                valueRange = 5f..60f,
+                modifier = Modifier.weight(1f)
+            )
+            Text(
+                text = "$currentTime s",
+                color = Color.White,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        Button(
+            onClick = navigateBack,
+            modifier = Modifier.width(200.dp)
+        ) {
             Text("Guardar y Volver")
         }
-    }*/
+    }
 }
+
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // NAVEGACIÓN: Se configura el NavHost y se comparte la misma instancia del GameViewModel
@@ -331,13 +323,13 @@ fun blaLibNavScreenSample() {
                 navigateToScreen2 = { navController.navigate(Destination.Screen2.toString()) },
                 navigateToScreen4 = { navController.navigate(Destination.Screen4.toString()) },
 
-            )
+                )
         }
         composable(Destination.Screen2.toString()) {
             FScreen2(
                 navigateToScore = { navController.navigate(Destination.Screen3.toString()) },
 
-            )
+                )
         }
         composable(Destination.Screen3.toString()) {
             FScreen3(
@@ -346,12 +338,11 @@ fun blaLibNavScreenSample() {
                     navController.popBackStack(Destination.Screen1.toString(), false)
                 },
 
-            )
+                )
         }
         composable(Destination.Screen4.toString()) {
-            Screen4(
-                navigateBack = { navController.popBackStack() },
-                gameViewModel = gameViewModel
+            FScreen4(
+                navigateBack = { navController.navigate(Destination.Screen1.toString()) },
             )
         }
     }
