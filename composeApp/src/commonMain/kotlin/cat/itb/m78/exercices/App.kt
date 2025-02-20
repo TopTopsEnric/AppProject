@@ -25,5 +25,5 @@ import org.jetbrains.compose.reload.DevelopmentEntryPoint
 
 @Composable
 internal fun App() = AppTheme {
-    controladorNavExamen()
+    Funcount()
 }
