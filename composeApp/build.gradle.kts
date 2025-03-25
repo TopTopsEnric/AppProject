@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.compose.hotreload)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlinx.serialization)
+    id("app.cash.sqldelight") version "2.0.2"
 }
 
 composeCompiler {
@@ -114,6 +115,8 @@ dependencies {
     androidTestImplementation(libs.androidx.uitest.junit4)
     debugImplementation(libs.androidx.uitest.testManifest)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
+    implementation("app.cash.sqldelight:native-driver:2.0.2")
 }
 
 compose.desktop {
@@ -135,6 +138,15 @@ compose.desktop {
                 iconFile.set(project.file("desktopAppIcons/MacosIcon.icns"))
                 bundleID = "cat.itb.m78.exercices.desktopApp"
             }
+        }
+    }
+}
+sqldelight {
+    databases {
+        create("MyDatabase") {
+            packageName.set("cat.itb.m78.exercices.db")
+            schemaOutputDirectory.set(file("src/commonMain/sqldelight/databases"))
+            verifyMigrations.set(true)
         }
     }
 }
