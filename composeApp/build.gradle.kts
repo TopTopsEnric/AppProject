@@ -64,6 +64,7 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:3.0.2")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
             implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+            implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
 
         }
 
@@ -79,16 +80,20 @@ kotlin {
             implementation(libs.androidx.activityCompose)
             implementation(libs.kotlinx.coroutines.android)
             implementation(libs.ktor.client.okhttp)
+            implementation("app.cash.sqldelight:android-driver:2.0.2")
+            implementation("androidx.startup:startup-runtime:1.2.0")
         }
 
         jvmMain.dependencies {
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutines.swing)
             implementation(libs.ktor.client.okhttp)
+            implementation("app.cash.sqldelight:sqlite-driver:2.0.2")
         }
 
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)
+            implementation("app.cash.sqldelight:native-driver:2.0.2")
         }
 
     }
@@ -115,8 +120,6 @@ dependencies {
     androidTestImplementation(libs.androidx.uitest.junit4)
     debugImplementation(libs.androidx.uitest.testManifest)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
-    implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
-    implementation("app.cash.sqldelight:native-driver:2.0.2")
 }
 
 compose.desktop {
