@@ -64,24 +64,25 @@ object NasaApi {
         val response = client.get(url).body<NasaApiResponse>()
 
 
-            val nasaList = response.photos.map { nasa ->
-                SelectAll(
-                    id = nasa.id.toLong(),
-                    sol = nasa.sol.toLong(),
-                    camera_id = nasa.camera.id.toLong(),
-                    img_src = nasa.img_src,
-                    earth_date = nasa.earth_date,
-                    rover_id = nasa.rover.id.toLong(),
-                    camera_name = nasa.camera.name,
-                    full_name = nasa.camera.full_name,
-                    rover_name = nasa.rover.name,
-                    landing_date = nasa.rover.landing_date,
-                    launch_date = nasa.rover.launch_date,
-                    status = nasa.rover.status
-                )
-            }
-            return nasaList
+        val nasaList = response.photos.map { nasa ->
+            SelectAll(
+                id = nasa.id.toLong(),
+                sol = nasa.sol.toLong(),
+                camera_id = nasa.camera.id.toLong(),
+                img_src = nasa.img_src,
+                earth_date = nasa.earth_date,
+                rover_id = nasa.rover.id.toLong(),
+                camera_name = nasa.camera.name,
+                full_name = nasa.camera.full_name,
+                rover_name = nasa.rover.name,
+                landing_date = nasa.rover.landing_date,
+                launch_date = nasa.rover.launch_date,
+                status = nasa.rover.status
+            )
+        }
+        return nasaList
 
     }
 }
+
 

@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
-import app.cash.sqldelight.db.SqlDriver
 
 class AppActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,6 +18,3 @@ class AppActivity : ComponentActivity() {
 @Preview
 @Composable
 fun AppPreview() { App() }
-actual fun createDriver(): SqlDriver {
-    TODO("Not yet implemented")
-}
