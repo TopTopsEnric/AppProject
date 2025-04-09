@@ -56,7 +56,7 @@ class SearchViewModel : ViewModel() {
                     }
                 }
             } catch (e: Exception) {
-                // Manejo silencioso del error
+
             }
         }
     }

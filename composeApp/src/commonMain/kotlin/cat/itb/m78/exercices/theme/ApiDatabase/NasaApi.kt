@@ -1,17 +1,10 @@
 package cat.itb.m78.exercices.theme.ApiDatabase
-import cat.itb.m78.exercices.database
-import cat.itb.m78.exercices.db.Camera
-import cat.itb.m78.exercices.db.Rover
 import cat.itb.m78.exercices.db.SelectAll
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
-import kotlinx.coroutines.flow.Flow
-
-
-import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
