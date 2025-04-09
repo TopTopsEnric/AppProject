@@ -10,6 +10,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.Flow
 
+
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -65,6 +66,7 @@ object NasaApi {
 
 
         val nasaList = response.photos.map { nasa ->
+            println("NasaDebug: URL de imagen: ${nasa.img_src}")
             SelectAll(
                 id = nasa.id.toLong(),
                 sol = nasa.sol.toLong(),
@@ -78,6 +80,7 @@ object NasaApi {
                 landing_date = nasa.rover.landing_date,
                 launch_date = nasa.rover.launch_date,
                 status = nasa.rover.status
+
             )
         }
         return nasaList

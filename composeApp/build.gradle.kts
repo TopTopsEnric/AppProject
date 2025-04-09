@@ -64,6 +64,7 @@ kotlin {
             implementation("io.ktor:ktor-client-content-negotiation:3.0.2")
             implementation("io.ktor:ktor-serialization-kotlinx-json:3.0.2")
             implementation("io.coil-kt.coil3:coil-compose:3.1.0")
+            implementation("io.coil-kt.coil3:coil-network-ktor3:3.1.0")
             implementation("app.cash.sqldelight:coroutines-extensions:2.0.2")
 
         }
