@@ -1,0 +1,79 @@
+CREATE TABLE rover (
+    id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    landing_date TEXT NOT NULL,
+    launch_date TEXT NOT NULL,
+    status TEXT NOT NULL
+);
+
+CREATE TABLE camera (
+    id INTEGER PRIMARY KEY NOT NULL,
+    name TEXT NOT NULL,
+    rover_id INTEGER NOT NULL,
+    full_name TEXT NOT NULL,
+    FOREIGN KEY (rover_id) REFERENCES rover(id)
+);
+
+CREATE TABLE nasa_photo (
+    id INTEGER PRIMARY KEY NOT NULL,
+    sol INTEGER NOT NULL,
+    camera_id INTEGER NOT NULL,
+    img_src TEXT NOT NULL,
+    earth_date TEXT NOT NULL,
+    rover_id INTEGER NOT NULL,
+    FOREIGN KEY (camera_id) REFERENCES camera(id),
+    FOREIGN KEY (rover_id) REFERENCES rover(id)
+);
+
+-- Índices para mejorar rendimiento de búsquedas
+CREATE INDEX idx_nasa_photo_camera ON nasa_photo(camera_id);
+CREATE INDEX idx_nasa_photo_rover ON nasa_photo(rover_id);
+CREATE INDEX idx_camera_rover ON camera(rover_id);
+selectAll:
+SELECT nasa_photo.*,
+       camera.name AS camera_name, camera.full_name,
+       rover.name AS rover_name, rover.landing_date, rover.launch_date, rover.status
+FROM nasa_photo
+JOIN camera ON nasa_photo.camera_id = camera.id
+JOIN rover ON nasa_photo.rover_id = rover.id;
+
+-- Consultas para verificar existencia
+countRoverById:
+SELECT COUNT(*) FROM rover WHERE id = ?;
+
+countCameraById:
+SELECT COUNT(*) FROM camera WHERE id = ?;
+
+countPhotoById:
+SELECT COUNT(*) FROM nasa_photo WHERE id = ?;
+
+-- Consultas para contar elementos relacionados
+countPhotosByCameraId:
+SELECT COUNT(*) FROM nasa_photo WHERE camera_id = ?;
+
+countCamerasByRoverId:
+SELECT COUNT(*) FROM camera WHERE rover_id = ?;
+
+-- Consultas para inserción
+insertRover:
+INSERT INTO rover (id, name, landing_date, launch_date, status)
+VALUES (?, ?, ?, ?, ?);
+
+insertCamera:
+INSERT INTO camera (id, name, rover_id, full_name)
+VALUES (?, ?, ?, ?);
+
+insertNasaPhoto:
+INSERT INTO nasa_photo (id, sol, camera_id, img_src, earth_date, rover_id)
+VALUES (?, ?, ?, ?, ?, ?);
+
+
+-- Consultas para eliminación
+deleteNasaPhoto:
+DELETE FROM nasa_photo WHERE id = ?;
+
+deleteCamera:
+DELETE FROM camera WHERE id = ?;
+
+deleteRover:
+DELETE FROM rover WHERE id = ?;
